@@ -24,7 +24,6 @@
     "ts-loader": "^9.5.0",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.2.2",
-    "uuid": "^9.0.1",
     "webpack": "^5.88.2"
   },
   "repository": {
