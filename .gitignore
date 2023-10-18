@@ -9,3 +9,5 @@ swagger
 
 # test directories
 coverage
+
+.env

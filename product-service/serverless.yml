@@ -1,17 +1,38 @@
 service: product-service
 frameworkVersion: '3'
 
+useDotenv: true
+
 provider:
   name: aws
   runtime: nodejs18.x
-  region: eu-central-1
+  region: ${env:REGION}
   httpApi:
     cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:BatchGetItem
+            - dynamodb:BatchWriteItem
+          Resource: 'arn:aws:dynamodb:${self:provider.region}:*:*'
+  environment:
+    ProductsTable: ${env:PRODUCTS_TABLE}
+    StocksTable: ${env:STOCKS_TABLE}
 
 plugins:
   - serverless-auto-swagger
   - serverless-webpack
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom:
   webpack:
@@ -47,6 +68,23 @@ functions:
               bodyType: Product
             404:
               description: Product not found
+              bodyType: ErrorResponse
+            500:
+              description: Something went wrong
+              bodyType: ErrorResponse
+  createProduct:
+    handler: functions/index.createProduct
+    events:
+      - httpApi:
+          path: /products
+          method: post
+          bodyType: CreateProduct
+          responseData:
+            200:
+              description: Successful response
+              bodyType: Product
+            400:
+              description: Product data is invalid
               bodyType: ErrorResponse
             500:
               description: Something went wrong

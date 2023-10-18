@@ -1,14 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "module": "es2020",
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@interfaces/*": ["models/*"],
+      "@models/*": ["models/*"],
       "@functions": ["functions/index.ts"],
       "@functions/*": ["functions/*"],
-      "@mocks/*": ["mocks/*"]
+      "@mocks/*": ["mocks/*"],
+      "@schema/*": ["schema/*"],
+      "@utils/*": ["utils/*"],
+      "@services/*": ["services/*"]
     },
     "resolveJsonModule": true,
     "esModuleInterop": true,
@@ -17,5 +21,6 @@
     "skipLibCheck": true,
     "noImplicitAny": true,
     "allowJs": false
-  }
+  },
+  "ts-node": { "esm": true }
 }
