@@ -40,7 +40,7 @@ custom:
     packager: 'npm'
     includeModules: true
   autoswagger:
-    typefiles: ['./models/product.types.ts', './models/api.types.ts']
+    typefiles: ['./models/product.types.swagger.ts', './models/api.types.ts']
 
 functions:
   getProducts:
