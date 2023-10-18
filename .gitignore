@@ -1,1 +1,11 @@
+# package directories
 node_modules
+
+# Serverless directories
+.serverless
+
+# swagger
+swagger
+
+# test directories
+coverage
