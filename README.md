@@ -1,4 +1,5 @@
-GET - https://rxzne5h09a.execute-api.eu-west-1.amazonaws.com/products
-GET - https://rxzne5h09a.execute-api.eu-west-1.amazonaws.com/products/{productId}
-GET - https://rxzne5h09a.execute-api.eu-west-1.amazonaws.com/swagger
-GET - https://rxzne5h09a.execute-api.eu-west-1.amazonaws.com/swagger.json
+GET - https://0trvutezp4.execute-api.eu-central-1.amazonaws.com/products
+GET - https://0trvutezp4.execute-api.eu-central-1.amazonaws.com/products/{productId}
+GET - https://cfpa3haqo0.execute-api.eu-central-1.amazonaws.com/dev/import
+GET - https://9duedbk6v7.execute-api.eu-central-1.amazonaws.com/swagger
+GET - https://9duedbk6v7.execute-api.eu-central-1.amazonaws.com/swagger.json

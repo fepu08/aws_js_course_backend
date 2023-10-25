@@ -1,0 +1,74 @@
+service: import-service
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: dev
+  region: ${env:REGION}
+  environment:
+    BUCKET: ${env:BUCKET}
+  httpApi:
+    cors: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: s3:ListBucket
+          Resource: arn:aws:s3:::${self:provider.environment.BUCKET}
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:GetObjectTagging
+            - s3:PutObject
+            - s3:PutObjectTagging
+            - s3:DeleteObject
+          Resource: arn:aws:s3:::${self:provider.environment.BUCKET}/*
+
+plugins:
+  - serverless-auto-swagger
+  - serverless-webpack
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'npm'
+    includeModules: true
+  autoswagger:
+    typefiles: ['./models/api.types.ts']
+
+functions:
+  importProductsFile:
+    handler: functions/index.importProductsFile
+    events:
+      - http:
+          path: /import
+          method: get
+          request:
+            parameters:
+              querystrings:
+                name: true
+          cors: true
+          responseData:
+            200:
+              description: Successful response
+              bodyType: string
+            400:
+              description: Missing request parameters
+              bodyType: ServerResponse
+            500:
+              description: Something went wrong
+              bodyType: ServerResponse
+  importFileParser:
+    handler: functions/index.importFileParser
+    events:
+      - s3:
+          bucket: ${self:provider.environment.BUCKET}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+            - suffix: .csv
+          existing: true

@@ -1,0 +1,35 @@
+{
+  "name": "import-service",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "sls deploy",
+    "remove": "sls remove",
+    "test": "jest"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1473.0",
+    "csv-parser": "^3.0.0",
+    "serverless": "^3.35.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.124",
+    "@types/jest": "^29.5.5",
+    "http-status-codes": "^2.3.0",
+    "jest": "^29.7.0",
+    "serverless-auto-swagger": "^2.12.0",
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-webpack": "^5.13.0",
+    "ts-jest": "^29.1.1",
+    "ts-loader": "^9.5.0",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fepu08/aws_js_course_backend"
+  },
+  "author": "fepu08",
+  "license": "MIT"
+}
