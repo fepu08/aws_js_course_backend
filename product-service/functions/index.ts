@@ -1,4 +1,5 @@
-import { default as getProducts } from './getProducts/handler';
-import { default as getProductById } from './getProductById/handler';
+import { handler as getProducts } from './getProducts/handler';
+import { handler as getProductById } from './getProductById/handler';
+import { handler as createProduct } from './createProduct/handler';
 
-export { getProducts, getProductById };
+export { getProducts, getProductById, createProduct };
