@@ -1,4 +1,3 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
 export interface ServerResponse {
   statusCode: StatusCodes;

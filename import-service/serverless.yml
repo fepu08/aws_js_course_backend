@@ -10,8 +10,8 @@ provider:
   region: ${env:REGION}
   environment:
     BUCKET: ${env:BUCKET}
-  httpApi:
-    cors: true
+    SQS_URL: ${env:SQS_URL}
+
   iam:
     role:
       statements:
@@ -26,6 +26,10 @@ provider:
             - s3:PutObjectTagging
             - s3:DeleteObject
           Resource: arn:aws:s3:::${self:provider.environment.BUCKET}/*
+        - Effect: 'Allow'
+          Action: 'sqs:*'
+          Resource:
+            - 'arn:aws:sqs:eu-west-1:611757490927:catalogItemsQueue'
 
 plugins:
   - serverless-auto-swagger

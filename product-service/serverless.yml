@@ -24,9 +24,23 @@ provider:
             - dynamodb:BatchGetItem
             - dynamodb:BatchWriteItem
           Resource: 'arn:aws:dynamodb:${self:provider.region}:*:*'
+        - Effect: Allow
+          Action: 'sqs:*'
+          Resource:
+            - Fn::GetAtt: [catalogItemsQueue, Arn]
+        - Effect: Allow
+          Action: 'sns:*'
+          Resource:
+            Ref: createProductTopic
+
   environment:
     ProductsTable: ${env:PRODUCTS_TABLE}
     StocksTable: ${env:STOCKS_TABLE}
+    SQS_URL:
+      Ref: catalogItemsQueue
+    SNS_TOPIC_ARN: !Ref createProductTopic
+    NOTIFICATION_EMAIL: ${env:NOTIFICATION_EMAIL}
+    NOTIFICATION_EMAIL2: ${env:NOTIFICATION_EMAIL2}
 
 plugins:
   - serverless-auto-swagger
@@ -40,11 +54,11 @@ custom:
     packager: 'npm'
     includeModules: true
   autoswagger:
-    typefiles: ['./models/product.types.swagger.ts', './models/api.types.ts']
+    typefiles: ['./models/product.types.ts', './models/api.types.ts']
 
 functions:
-  getProducts:
-    handler: functions/index.getProducts
+  getProductsList:
+    handler: functions/index.getProductsList
     events:
       - httpApi:
           path: /products
@@ -89,3 +103,45 @@ functions:
             500:
               description: Something went wrong
               bodyType: ErrorResponse
+  catalogBatchProcess:
+    handler: functions/index.catalogBatchProcess
+    events:
+      - sqs:
+          batchSize: 5
+          arn:
+            Fn::GetAtt:
+              - catalogItemsQueue
+              - Arn
+
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: 'AWS::SQS::Queue'
+      Properties:
+        QueueName: 'catalogItemsQueue'
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: createProductTopic
+    primeSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${self:provider.environment.NOTIFICATION_EMAIL}
+        Protocol: email
+        TopicArn: { 'Ref': 'createProductTopic' }
+        FilterPolicy:
+          price:
+            - numeric:
+                - '>='
+                - 10
+    basicSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: ${self:provider.environment.NOTIFICATION_EMAIL2}
+        Protocol: email
+        TopicArn: { 'Ref': 'createProductTopic' }
+        FilterPolicy:
+          price:
+            - numeric:
+                - '<'
+                - 10
