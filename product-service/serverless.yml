@@ -58,7 +58,7 @@ custom:
 
 functions:
   getProductsList:
-    handler: functions/index.getProductsList
+    handler: functions/index.getProducts
     events:
       - httpApi:
           path: /products

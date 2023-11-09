@@ -11,6 +11,7 @@ import { marshall } from '@aws-sdk/util-dynamodb';
 
 import { v4 } from 'uuid';
 import { StatusCodes } from 'http-status-codes';
+import { StockSchema } from '../schema';
 
 export class ProductService {
   async getAllProducts(): Promise<Product[]> {
@@ -38,7 +39,6 @@ export class ProductService {
 
   async getProductById(productId: string): Promise<Product | null> {
     const { PRODUCTS_TABLE, STOCKS_TABLE } = process.env;
-
     const productQuery = new GetCommand({
       TableName: PRODUCTS_TABLE,
       Key: { id: productId },

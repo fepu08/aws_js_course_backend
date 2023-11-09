@@ -11,6 +11,7 @@ provider:
   environment:
     BUCKET: ${env:BUCKET}
     SQS_URL: ${env:SQS_URL}
+    BASIC_AUTHORIZER_ARN: ${env:BASIC_AUTHORIZER_ARN}
 
   iam:
     role:
@@ -56,6 +57,12 @@ functions:
               querystrings:
                 name: true
           cors: true
+          authorizer:
+            name: basicAuthorizer
+            type: token
+            identitySource: method.request.header.Authorization
+            arn: ${self:provider.environment.BASIC_AUTHORIZER_ARN}
+            resultTtlInSeconds: 0
           responseData:
             200:
               description: Successful response
@@ -76,3 +83,15 @@ functions:
             - prefix: uploaded/
             - suffix: .csv
           existing: true
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
