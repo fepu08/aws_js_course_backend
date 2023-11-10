@@ -1,31 +1,52 @@
-import { S3 } from 'aws-sdk';
+import { S3, SQS } from 'aws-sdk';
 import csvParser from 'csv-parser';
 import { APIGatewayProxyResult, S3Event, S3EventRecord } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
 import { errorResponse, successfulResponse } from '@utils/responses';
+import { MetadataBearer } from '@aws-sdk/types';
 
 const s3 = new S3({ region: process.env.REGION });
+const sqs = new SQS({ region: process.env.REGION });
 
-const processRecord = (record: S3EventRecord) => {
-  console.log('Processing record:', record);
+const sendResultToSQS = async (data: object) => {
+  const { SQS_URL = '' } = process.env;
+
+  const message = await sqs
+    .sendMessage({
+      QueueUrl: SQS_URL,
+      MessageBody: JSON.stringify(data),
+    })
+    .promise();
+
+  console.log(`SentMessage: ${message}`);
+
+  return message;
 };
-
-const processEnd = () => console.log('Stream has ended');
-const processError = (error: Error) =>
-  console.log(`Error happened in csvParser: ${error}`);
 
 const getProductsFromCSV = async (
   s3: S3,
   params: S3.Types.GetObjectRequest
 ) => {
   try {
+    const products: object[] = [];
     const s3Stream = s3.getObject(params).createReadStream();
 
-    return s3Stream
-      .pipe(csvParser())
-      .on('data', processRecord)
-      .on('end', processEnd)
-      .on('error', processError);
+    return new Promise((resolve, reject) => {
+      s3Stream
+        .pipe(csvParser())
+        .on('data', (data: unknown) => {
+          console.log('Product: ', data);
+          products.push(data as object);
+        })
+        .on('end', () => {
+          console.log('Stream has ended');
+          resolve(products);
+        })
+        .on('error', (error) => {
+          console.log('Error happened in csvParser: ', error);
+          reject(error);
+        });
+    });
   } catch (error) {
     throw new Error(`Error happened in getProductsFromCSV: ${error}`);
   }
@@ -66,7 +87,7 @@ export const handler = async (
       Key: record.s3.object.key,
     };
 
-    const products = await getProductsFromCSV(s3, params);
+    const products = (await getProductsFromCSV(s3, params)) as object[];
 
     if (!products) {
       return errorResponse(
@@ -74,6 +95,8 @@ export const handler = async (
         StatusCodes.NOT_FOUND
       );
     }
+
+    await Promise.all(products.map((product) => sendResultToSQS(product)));
 
     await moveParsedFiles(s3, params);
 
