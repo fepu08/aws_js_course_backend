@@ -1,0 +1,33 @@
+service: rs-cart-api
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:REGION}
+  environment:
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_NAME: ${env:DB_NAME}
+    DB_USERNAME: ${env:DB_USERNAME}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+functions:
+  main:
+    handler: dist/main.handler
+    events:
+      - http:
+          cors: true
+          method: ANY
+          path: /
+      - http:
+          cors: true
+          method: ANY
+          path: '{proxy+}'
