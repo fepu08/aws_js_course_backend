@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@constants/*": ["constants/*"],
+      "@functions": ["functions/index.ts"],
+      "@interfaces/*": ["models/*"],
+      "@functions/*": ["functions/*"],
+      "@utils/*": ["utils/*"]
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "allowJs": false
+  },
+  "ts-node": {
+    "esm": true
+  }
+}

@@ -1,54 +1,53 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import { APIGatewayProxyEvent } from 'aws-lambda/trigger/api-gateway-proxy';
-
-import { ErrorResponse } from '@models/api.types';
+import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
+import { ErrorResponse } from '@models/api.types';
+import { CreateProductSchema } from '@schema/products-schema';
+import { ProductService } from '@services/productService';
 import {
   BASIC_ERROR_MESSAGE,
-  GET_PRODUCT_BY_ID_ERROR_MESSAGE,
-  getMissingProductIdErrorMessage,
+  PRODUCT_CREATED_ERROR_MESSAGE,
+  PRODUCT_CREATED_SUCCESS_MESSAGE,
 } from 'models/messages';
-import { ProductService } from '@services/productService';
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ) => {
   const productsService = new ProductService();
   try {
-    console.log(
-      'Lambda function getProductById request',
-      JSON.stringify(event)
-    );
+    console.log('Lambda function createProduct request', JSON.stringify(event));
 
-    const productId = event.pathParameters?.productId;
+    const parsedBody = JSON.parse(event.body || '{}');
 
-    if (!productId) {
-      const errorResPonse: ErrorResponse = {
-        message: GET_PRODUCT_BY_ID_ERROR_MESSAGE,
+    const validationResult = CreateProductSchema.safeParse(parsedBody);
+
+    if (!validationResult.success) {
+      const errorResponse: ErrorResponse = {
+        message: 'Product data is invalid',
       };
 
       return {
-        statusCode: StatusCodes.NOT_FOUND,
-        body: JSON.stringify(errorResPonse),
+        statusCode: StatusCodes.BAD_REQUEST,
+        body: JSON.stringify(errorResponse),
       };
     }
 
-    const product = productsService.getProductById(productId);
+    const productId = await productsService.createProduct(
+      validationResult.data
+    );
 
-    if (!product) {
-      const errorResPonse: ErrorResponse = {
-        message: getMissingProductIdErrorMessage(productId),
-      };
-
+    if (!productId) {
       return {
-        statusCode: StatusCodes.NOT_FOUND,
-        body: JSON.stringify(errorResPonse),
+        statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+        body: PRODUCT_CREATED_ERROR_MESSAGE,
       };
     }
 
     return {
-      statusCode: 200,
-      body: JSON.stringify(product),
+      statusCode: StatusCodes.CREATED,
+      body: JSON.stringify({
+        message: PRODUCT_CREATED_SUCCESS_MESSAGE,
+        productId,
+      }),
     };
   } catch (error: unknown) {
     let message = BASIC_ERROR_MESSAGE;

@@ -1,0 +1,41 @@
+service: authorization-service
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${env:REGION}
+  stage: dev
+
+  environment:
+    fepu08: ${env:fepu08}
+
+plugins:
+  - serverless-auto-swagger
+  - serverless-webpack
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+custom:
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    packager: 'npm'
+    includeModules: true
+  autoswagger:
+    typefiles: ['./models/api.types.ts']
+
+functions:
+  basicAuthorizer:
+    handler: functions/index.basicAuthorizer
+    events:
+      - http:
+        responseData:
+          200:
+            description: Successful API Response
+            bodyType: PolicyResponse
+          404:
+            description: Error in API Response
+            bodyType: ErrorResponse
