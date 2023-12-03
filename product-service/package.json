@@ -7,7 +7,8 @@
     "remove": "sls remove",
     "test": "jest",
     "seed-products": "ts-node ./utils/seed-products.ts",
-    "seed-stocks": "ts-node ./utils/seed-stocks.ts"
+    "seed-stocks": "ts-node ./utils/seed-stocks.ts",
+    "build:webpack": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1473.0",
